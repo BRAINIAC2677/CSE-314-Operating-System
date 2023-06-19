@@ -17,17 +17,13 @@ get_extension()
 
 get_source_code_path()
 {
-	if [ -d "$1" ]
-	then
-		for i in "$1"/*
-		do
+	if [ -d "$1" ]; then
+		for i in "$1"/*; do
 			get_source_code_path "$i"
 		done
-	elif [ -f "$1" ]
-	then
+	elif [ -f "$1" ]; then
         extension=`get_extension "$1"`
-        if [ "$extension" == "c" ] || [ "$extension" == "py" ] || [ "$extension" == "java" ]
-        then 
+        if [ "$extension" == "c" ] || [ "$extension" == "py" ] || [ "$extension" == "java" ]; then 
             echo "$1"
         fi 
 	fi
@@ -42,14 +38,12 @@ generate_and_match_output()
     ${compilation_commands[$extension]}
     counter=1
     matched=0
-    for test in "${initial_folder}/${tests_folder_name}"/*
-    do
+    for test in "${initial_folder}/${tests_folder_name}"/*; do
         current_out_file="out${counter}.txt"
         current_ans_file="${initial_folder}/${ans_folder_name}/ans${counter}.txt"
         ${run_commands[$extension]} < "$test" > "${current_out_file}"
         differences=`diff "${current_out_file}" "${current_ans_file}"`
-        if [ "${#differences}" == "0" ]
-        then 
+        if [ "${#differences}" == "0" ]; then 
             matched=$(( $matched + 1 ))
         fi 
         counter=$( expr $counter + 1 )
@@ -68,8 +62,7 @@ organize_file()
     unzip -qq "${id}/${file_name}" -d "${id}"
     source_code_path=`get_source_code_path "$id"`
     extension=`get_extension "$source_code_path"`
-    if [  "$verbose" == "true" ]
-    then 
+    if [  "$verbose" == "true" ]; then 
         echo "organizing files of $id"
     fi
     id_root_dir="${targets_folder_name}/${file_type[$extension]}/${id}"
@@ -80,15 +73,13 @@ organize_file()
 
 create_targets_folder()
 {
-    if [ -a "$targets_folder_name" ]
-    then 
+    if [ -a "$targets_folder_name" ]; then 
         rm -r "$targets_folder_name"
     fi
     mkdir "$targets_folder_name"
     cd "$targets_folder_name"
     mkdir C Python Java
-    if [ "$noexecute" == "false" ]
-    then
+    if [ "$noexecute" == "false" ]; then
         touch result.csv
         echo "student_id,type,matched,not_matched" >> result.csv
     fi
@@ -98,13 +89,10 @@ create_targets_folder()
 main() 
 {
     create_targets_folder
-    for file_path in "$submissions_folder_name"/*
-    do
+    for file_path in "$submissions_folder_name"/*; do
         organize_file "$file_path"
-        if [ "$noexecute" == "false" ]
-        then
-            if [ "$verbose" == "true" ]
-            then 
+        if [ "$noexecute" == "false" ]; then
+            if [ "$verbose" == "true" ]; then 
                 echo "Executing files of $id"
             fi
             generate_and_match_output "$id" "$extension" 
@@ -112,9 +100,8 @@ main()
     done
 }
 
-if [ $# -lt 4 ]
-then 
-    echo -e "Missing arguments.\n
+echo_man(){
+    echo -e "\n
 man page
 ---------\n
     NAME
@@ -138,6 +125,11 @@ man page
     AUTHOR
         Written by Asif Azad.
         "
+}
+
+if [ $# -lt 4 ]; then 
+    echo -e "Missing arguments"
+    echo_man
     exit 
 fi
 
@@ -156,13 +148,27 @@ declare -A run_commands=( [c]="./main.out" [py]="python3 main.py" [java]="java M
 declare -A file_type=( [c]="C" [py]="Python" [java]="Java" )
 declare -A desired_filename=( [c]="main.c" [py]="main.py" [java]="Main.java" )
 
-if [ $# -gt 4 ] && [ "$5" == "-v" ]
-then
-    verbose=true
+if [ ! -e "$submissions_folder_name" ]; then
+  echo "Error, submission folder doesn't exist"
+  exit
 fi
-if [ $# -gt 5 ] && [ "$6" == "-noexecute" ]
-then 
-    noexecute=true 
+if [ ! -e "$tests_folder_name" ]; then
+  echo "Error, test folder doesn't exist"
+  exit
 fi
+if [ ! -e "$ans_folder_name" ]; then
+  echo "Error, answer folder doesn't exist"
+  exit
+fi
+
+for arg in "$@"; do 
+    if [ "$arg" == "-v" ]; then 
+        verbose=true
+    elif [ "$arg" == "-noexecute" ]; then
+        noexecute=true
+    elif [ "$arg" == "--help" ] || [ "$arg" == "-h" ]; then 
+        echo_man 
+    fi
+done
 
 main 
