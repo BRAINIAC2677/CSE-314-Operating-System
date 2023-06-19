@@ -42,10 +42,10 @@ generate_and_match_output()
     ${compilation_commands[$extension]}
     counter=1
     matched=0
-    for test in "../../../${tests_folder_name}"/*
+    for test in "${initial_folder}/${tests_folder_name}"/*
     do
         current_out_file="out${counter}.txt"
-        current_ans_file="../../../${ans_folder_name}/ans${counter}.txt"
+        current_ans_file="${initial_folder}/${ans_folder_name}/ans${counter}.txt"
         ${run_commands[$extension]} < "$test" > "${current_out_file}"
         differences=`diff "${current_out_file}" "${current_ans_file}"`
         if [ "${#differences}" == "0" ]
@@ -54,7 +54,7 @@ generate_and_match_output()
         fi 
         counter=$( expr $counter + 1 )
     done
-    cd ../../..
+    cd "$initial_folder"
     echo "${id},${file_type[$extension]},${matched},$(( ${counter} - 1 - ${matched} ))" >> "${targets_folder_name}/result.csv" 
 }
 
@@ -92,7 +92,7 @@ create_targets_folder()
         touch result.csv
         echo "student_id,type,matched,not_matched" >> result.csv
     fi
-    cd ..
+    cd "$initial_folder"
 }
 
 main() 
@@ -124,13 +124,13 @@ man page
     DESCRIPTION
         organize, execute, generate output from test files and match output against answers for students submissions.\n
         arg1
-            submissions folder directory\n
+            relative path of submissions folder\n
         arg2
-            targets folder directory\n
+            relative path of targets folder\n
         arg3
-            tests folder directory\n
+            relative path of tests folder\n
         arg4
-            answers folder directory\n
+            relative path of answers folder\n
         -v
             if provided, will print useful information while executing scripts.\n
         -noexecute
@@ -141,10 +141,11 @@ man page
     exit 
 fi
 
-submissions_folder_name=$1
-targets_folder_name=$2
-tests_folder_name=$3
-ans_folder_name=$4
+initial_folder=`pwd`
+submissions_folder_name="$1"
+targets_folder_name="$2"
+tests_folder_name="$3"
+ans_folder_name="$4"
 verbose=false
 noexecute=false
 id=""
