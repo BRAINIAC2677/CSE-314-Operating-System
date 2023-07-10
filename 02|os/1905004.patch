@@ -338,24 +338,6 @@ index a3c962b..a1a4f33 100644
  // number of elements in fixed-size array
 -#define NELEM(x) (sizeof(x)/sizeof((x)[0]))
 +#define NELEM(x) (sizeof(x) / sizeof((x)[0]))
-diff --git a/kernel/history.h b/kernel/history.h
-new file mode 100644
-index 0000000..464fff0
---- /dev/null
-+++ b/kernel/history.h
-@@ -0,0 +1,12 @@
-+#include "syscall.h"
-+#include "spinlock.h"
-+
-+struct syscall_stat
-+{
-+    char syscall_name[20];
-+    int count;
-+    int accum_time;
-+    struct spinlock lock;
-+};
-+
-+extern struct syscall_stat syscall_stats[NSYSCALLS + 1];
 diff --git a/kernel/kernelvec.S b/kernel/kernelvec.S
 index fb31b32..2e52b9d 100644
 --- a/kernel/kernelvec.S
@@ -1326,7 +1308,7 @@ index 19543af..b8b9d1c 100644
    uint ino;    // Inode number
    short type;  // Type of file
 diff --git a/kernel/syscall.c b/kernel/syscall.c
-index ed65409..87bc9eb 100644
+index ed65409..f6817e0 100644
 --- a/kernel/syscall.c
 +++ b/kernel/syscall.c
 @@ -6,26 +6,25 @@
@@ -1526,7 +1508,7 @@ index ed65409..87bc9eb 100644
  // Prototypes for the functions that handle system calls.
  extern uint64 sys_fork(void);
  extern uint64 sys_exit(void);
-@@ -101,47 +216,132 @@ extern uint64 sys_unlink(void);
+@@ -101,47 +216,133 @@ extern uint64 sys_unlink(void);
  extern uint64 sys_link(void);
  extern uint64 sys_mkdir(void);
  extern uint64 sys_close(void);
@@ -1616,21 +1598,22 @@ index ed65409..87bc9eb 100644
  
 -void
 -syscall(void)
++struct syscall_stat syscall_stats[NSYSCALLS + 1];
++struct spinlock syscall_stat_locks[NSYSCALLS + 1];
++
 +void init_syscall_stat(struct syscall_stat *_syscall_stat, const char *_syscall_name)
 +{
 +  safestrcpy(_syscall_stat->syscall_name, _syscall_name, sizeof(_syscall_stat->syscall_name));
 +  _syscall_stat->count = 0;
 +  _syscall_stat->accum_time = 0;
-+  initlock(&_syscall_stat->lock, "sycall_stat_lock");
 +}
-+
-+struct syscall_stat syscall_stats[NSYSCALLS + 1];
 +
 +void historyinit()
 +{
 +  for (int i = 1; i <= NSYSCALLS; i++)
 +  {
 +    init_syscall_stat(&syscall_stats[i], syscall_names[i]);
++    initlock(&syscall_stat_locks[i], "sycall_stat_lock");
 +  }
 +}
 +
@@ -1668,10 +1651,10 @@ index ed65409..87bc9eb 100644
 +
 +    p->trapframe->a0 = ret_val;
 +
-+    acquire(&syscall_stats[num].lock);
++    acquire(&syscall_stat_locks[num]);
 +    syscall_stats[num].count++;
 +    syscall_stats[num].accum_time += (end_ticks - start_ticks);
-+    release(&syscall_stats[num].lock);
++    release(&syscall_stat_locks[num]);
 +
 +    if (num == p->trace_sys_num)
 +    {
@@ -2529,106 +2512,6 @@ index 9f69783..f428ad5 100644
      return -1;
    }
  }
-diff --git a/user/history.c b/user/history.c
-new file mode 100644
-index 0000000..4ef1b52
---- /dev/null
-+++ b/user/history.c
-@@ -0,0 +1,41 @@
-+#include "kernel/param.h"
-+#include "kernel/types.h"
-+#include "kernel/stat.h"
-+#include "user/user.h"
-+#include "kernel/syscall.h"
-+#include "kernel/history.h"
-+
-+int main(int argc, char *argv[])
-+{
-+  if (argc > 2)
-+  {
-+    printf("history can have at most 1 argument.\n");
-+    exit(1);
-+  }
-+
-+  if (argc == 1)
-+  {
-+
-+    struct syscall_stat _syscall_stat;
-+    for (int i = 1; i <= NSYSCALLS; i++)
-+    {
-+      history(i, &_syscall_stat);
-+      printf("syscall: %s, #: %d, time: %d\n", _syscall_stat.syscall_name, _syscall_stat.count, _syscall_stat.accum_time);
-+    }
-+  }
-+  else
-+  {
-+    if (atoi(argv[1]) <= 0)
-+    {
-+      printf("history can have at most 1 argument.\n");
-+      exit(1);
-+    }
-+    else
-+    {
-+      struct syscall_stat _syscall_stat;
-+      history(atoi(argv[1]), &_syscall_stat);
-+      printf("syscall: %s, #: %d, time: %d\n", _syscall_stat.syscall_name, _syscall_stat.count, _syscall_stat.accum_time);
-+    }
-+  }
-+  exit(0);
-+}
-diff --git a/user/shutdown.c b/user/shutdown.c
-new file mode 100644
-index 0000000..5c783ed
---- /dev/null
-+++ b/user/shutdown.c
-@@ -0,0 +1,14 @@
-+#include "kernel/param.h"
-+#include "kernel/types.h"
-+#include "user/user.h"
-+
-+int main(int argc, char *argv[])
-+{
-+    if (argc != 1)
-+    {
-+        printf("shutdown ");
-+        exit(1);
-+    }
-+    shutdown();
-+    exit(0);
-+}
-diff --git a/user/trace.c b/user/trace.c
-new file mode 100644
-index 0000000..3dd9b4c
---- /dev/null
-+++ b/user/trace.c
-@@ -0,0 +1,27 @@
-+#include "kernel/param.h"
-+#include "kernel/types.h"
-+#include "kernel/stat.h"
-+#include "user/user.h"
-+
-+int
-+main(int argc, char *argv[])
-+{
-+  int i;
-+  char *nargv[MAXARG];
-+
-+  if(argc < 3 || (argv[1][0] < '0' || argv[1][0] > '9')){
-+    fprintf(2, "Usage: %s sys_call_num command\n", argv[0]);
-+    exit(1);
-+  }
-+
-+  if (trace(atoi(argv[1])) < 0) {
-+    fprintf(2, "%s: trace failed\n", argv[0]);
-+    exit(1);
-+  }
-+
-+  for(i = 2; i < argc && i < MAXARG; i++){
-+    nargv[i-2] = argv[i];
-+  }
-+  exec(nargv[0], nargv);
-+  exit(0);
-+}
 diff --git a/user/ulib.c b/user/ulib.c
 index c7b66c4..6570157 100644
 --- a/user/ulib.c
