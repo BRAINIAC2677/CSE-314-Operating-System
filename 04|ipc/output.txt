@@ -1,0 +1,74 @@
+Student 4 has arrived at the print station 4 at time 0.
+Student 4 has started printing at the printing station 4 at time 0.
+Student 13 has arrived at the print station 1 at time 1.
+Student 12 has arrived at the print station 4 at time 1.
+Student 13 has started printing at the printing station 1 at time 1.
+Student 6 has arrived at the print station 2 at time 2.
+Student 6 has started printing at the printing station 2 at time 2.
+Student 15 has arrived at the print station 3 at time 2.
+Student 15 has started printing at the printing station 3 at time 2.
+Student 10 has arrived at the print station 2 at time 3.
+Student 5 has arrived at the print station 1 at time 3.
+Student 11 has arrived at the print station 3 at time 3.
+Student 7 has arrived at the print station 3 at time 5.
+Student 2 has arrived at the print station 2 at time 5.
+Student 1 has arrived at the print station 1 at time 6.
+Student 3 has arrived at the print station 3 at time 6.
+Student 9 has arrived at the print station 1 at time 6.
+Student 8 has arrived at the print station 4 at time 7.
+Student 14 has arrived at the print station 2 at time 7.
+Student 4 has finished printing at printing station 4 at time 10.
+Student 8 has started printing at the printing station 4 at time 10.
+Student 13 has finished printing at printing station 1 at time 11.
+Student 1 has started printing at the printing station 1 at time 11.
+Student 6 has finished printing at printing station 2 at time 12.
+Student 10 has started printing at the printing station 2 at time 12.
+Student 15 has finished printing at printing station 3 at time 12.
+Student 11 has started printing at the printing station 3 at time 12.
+Staff 1 has started reading entry book at time 14.
+Staff 2 has started reading entry book at time 17.
+Staff 1 has finished reading the entry book at time 17. No. of submission = 0
+Student 8 has finished printing at printing station 4 at time 20.
+Student 12 has started printing at the printing station 4 at time 20.
+Staff 2 has finished reading the entry book at time 20. No. of submission = 0
+Student 1 has finished printing at printing station 1 at time 21.
+Student 5 has started printing at the printing station 1 at time 21.
+Student 10 has finished printing at printing station 2 at time 22.
+Student 11 has finished printing at printing station 3 at time 22.
+Student 2 has started printing at the printing station 2 at time 22.
+Student 3 has started printing at the printing station 3 at time 22.
+Student 12 has finished printing at printing station 4 at time 30.
+Staff 1 has started reading entry book at time 31.
+Student 5 has finished printing at printing station 1 at time 31.
+Student 9 has started printing at the printing station 1 at time 31.
+Student 2 has finished printing at printing station 2 at time 32.
+Student 3 has finished printing at printing station 3 at time 32.
+Student 7 has started printing at the printing station 3 at time 32.
+Student 14 has started printing at the printing station 2 at time 32.
+Group 1 has arrived at the binding station at time 32.
+Group 1 has started binding at time 32.
+Staff 1 has finished reading the entry book at time 34. No. of submission = 0
+Staff 2 has started reading entry book at time 37.
+Group 1 has finished binding at time 40.
+Group 1 has arrived at the library at time 40.
+Staff 2 has finished reading the entry book at time 40. No. of submission = 0
+Group 1 has started submission at time 40.
+Student 9 has finished printing at printing station 1 at time 41.
+Student 14 has finished printing at printing station 2 at time 42.
+Student 7 has finished printing at printing station 3 at time 42.
+Group 2 has arrived at the binding station at time 42.
+Group 2 has started binding at time 42.
+Group 3 has arrived at the binding station at time 42.
+Group 3 has started binding at time 42.
+Group 1 has finished submission at time 43.
+Staff 1 has started reading entry book at time 48.
+Group 2 has finished binding at time 50.
+Group 2 has arrived at the library at time 50.
+Group 3 has finished binding at time 50.
+Group 3 has arrived at the library at time 50.
+Staff 1 has finished reading the entry book at time 51. No. of submission = 1
+Group 2 has started submission at time 51.
+Group 2 has finished submission at time 54.
+Group 3 has started submission at time 54.
+Group 3 has finished submission at time 57.
+Staff 2 has started reading entry book at time 57.
