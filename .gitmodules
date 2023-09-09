@@ -1,3 +1,6 @@
 [submodule "xv6-riscv"]
 	path = xv6-riscv
 	url = https://github.com/mit-pdos/xv6-riscv
+[submodule "xv6-riscv-base"]
+	path = xv6-riscv-base
+	url = https://github.com/mit-pdos/xv6-riscv.git
